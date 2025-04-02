@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <header>
+        <h1>Welcome, {{ user.name }}</h1>
+        <a href="{{ url_for('logout') }}" class="btn">Logout</a>
+    </header>
+    
+    <div class="container">
+        <h2>Available Stalls</h2>
+        <div id="stallsContainer" class="stalls-grid">
+            {% for stall in stalls %}
+                <div class="stall-card" data-id="{{ stall.id }}">
+                    <h3>{{ stall.name }}</h3>
+                    <p>{{ stall.menu_items|length }} items available</p>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div id="menuModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h2 id="modalStallName"></h2>
+                <div id="menuItemsContainer"></div>
+                <div id="orderSummary">
+                    <h3>Your Order</h3>
+                    <div id="orderItems"></div>
+                    <div id="orderTotal">Total: $0.00</div>
+                    <button id="placeOrderBtn" class="btn">Place Order</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="orderConfirmation" class="modal">
+            <div class="modal-content">
+                <h2>Order Placed Successfully!</h2>
+                <p>Your order ID: <span id="orderId"></span></p>
+                <p>Please proceed to the stall to make payment when collecting your food.</p>
+                <button id="confirmOkBtn" class="btn">OK</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Open menu modal when stall card is clicked
+        document.querySelectorAll('.stall-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const stallId = this.dataset.id;
+                const stallName = this.querySelector('h3').textContent;
+                
+                // Fetch menu items
+                fetch(`/api/stalls/${stallId}/menu`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('modalStallName').textContent = stallName;
+                        const menuContainer = document.getElementById('menuItemsContainer');
+                        menuContainer.innerHTML = '';
+                        
+                        data.menu.forEach(item => {
+                            const menuItem = document.createElement('div');
+                            menuItem.className = 'menu-item';
+                            menuItem.innerHTML = `
+                                <div>
+                                    <h4>${item.name}</h4>
+                                    <p>$${item.price.toFixed(2)}</p>
+                                </div>
+                                <button data-id="${item.id}" data-price="${item.price}" data-name="${item.name}">Add to Order</button>
+                            `;
+                            menuContainer.appendChild(menuItem);
+                        });
+                        
+                        // Reset order
+                        currentOrder = {
+                            stallId: stallId,
+                            items: [],
+                            total: 0
+                        };
+                        updateOrderSummary();
+                        
+                        // Show modal
+                        document.getElementById('menuModal').style.display = 'block';
+                    });
+            });
+        });
+    </script>
+{% endblock %}
