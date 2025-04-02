@@ -3,3 +3,6 @@ Flask-SQLAlchemy==3.0.3
 Flask-Bcrypt==1.0.1
 Flask-Login==0.6.3
 python-dotenv==1.0.0
+psycopg2-binary==2.9.6
+gunicorn==20.1.0
+echo -e "Flask==2.3.2\nFlask-SQLAlchemy==3.0.3\nFlask-Bcrypt==1.0.1\nFlask-Login==0.6.3\npython-dotenv==1.0.0\npsycopg2-binary==2.9.6\ngunicorn==20.1.0" > requirements.txt
